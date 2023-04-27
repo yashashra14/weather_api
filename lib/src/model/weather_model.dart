@@ -5,6 +5,8 @@ class WeatherModel {
   int? humidity;
   double? feels_like;
   int? pressure;
+  String? icon;
+  String? weatherDesc;
 
   WeatherModel({
     this.cityName,
@@ -13,15 +15,19 @@ class WeatherModel {
     this.humidity,
     this.feels_like,
     this.pressure,
+    this.icon,
+    this.weatherDesc,
   });
 
-  WeatherModel.fromJson(Map<String,dynamic> json){
+  WeatherModel.fromJson(Map<String, dynamic> json) {
     cityName = json["name"];
     temp = json["main"]["temp"];
     wind = json["wind"]["speed"];
     pressure = json["main"]["pressure"];
     humidity = json["main"]["humidity"];
     feels_like = json["main"]["feels_like"];
+    icon = json["weather"][0]["icon"];
+    weatherDesc = json["weather"][0]["main"];
   }
   @override
   String toString() {
@@ -33,6 +39,7 @@ class WeatherModel {
       $pressure
       $humidity
       $feels_like
+      $icon
     """;
   }
 }

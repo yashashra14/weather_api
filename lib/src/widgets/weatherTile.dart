@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-Widget weatherWidget(IconData icon, String temp, String location){
+Widget weatherWidget(
+    String icon, String weatherDesc, String temp, String location) {
   return Center(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -9,10 +10,12 @@ Widget weatherWidget(IconData icon, String temp, String location){
         const SizedBox(
           height: 20,
         ),
-        Icon(
-          icon,
-          color: Colors.orange,
-          size: 64.0,
+        Image.network("https://openweathermap.org/img/wn/$icon@2x.png"),
+        Text(
+          weatherDesc,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
         ),
         const SizedBox(
           height: 10,
