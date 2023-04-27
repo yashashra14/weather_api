@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:weather_app/src/services/geolocation_service.dart';
 import '../services/weather_api_service.dart';
@@ -63,99 +62,143 @@ class WeatherState extends State<Weather> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Weather App',
-      home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.indigo,
-          leading: IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {},
-          ),
-          title: Center(child: Text(city)),
-          actions: [
-            DropdownButton(
-              iconEnabledColor: Colors.white,
-              dropdownColor: Colors.indigo,
-              value: city,
-              items: cityList.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.indigo,
+        leading: IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () {
+            setState(() {
+              showDialog<List<String>>(
+                context: context,
+                barrierDismissible: false, // user must tap button!
+                builder: (BuildContext context) {
+                  TextEditingController? controller = TextEditingController();
+                  return AlertDialog(
+                    title: const Text('Add city'),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: <Widget>[
+                          const Text('Add city to your App'),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          TextField(
+                            controller: controller,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) => setState(
-                () {
-                  city = value!;
-                  yourLocation = value == 'Your Location';
-                },
-              ),
-            ),
-          ],
-        ),
-        body: Container(
-          decoration: const BoxDecoration(
-            color: Colors.indigo,
-          ),
-          child: FutureBuilder(
-            future: yourLocation ? getDataUsingLat() : getDataUsingCity(),
-            builder: (context, AsyncSnapshot<WeatherModel?> snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.none:
-                  return const Center(child: CircularProgressIndicator());
-                case ConnectionState.waiting:
-                  return const Center(child: CircularProgressIndicator());
-                case ConnectionState.active:
-                  return const Center(child: CircularProgressIndicator());
-                case ConnectionState.done:
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  final data = snapshot.data;
-                  final temp = data!.temp! - 273.15; // to Celcius
-                  final feels_like = data.feels_like! - 273.15; // to Celcius
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      weatherWidget(
-                        data.icon!,
-                        data.weatherDesc!,
-                        temp.toStringAsFixed(1),
-                        data.cityName!,
-                      ),
-                      const SizedBox(
-                        height: 60,
-                      ),
-                      const Text(
-                        "Additional Information",
-                        style: TextStyle(
-                          fontSize: 24,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Divider(),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      additionalInfo(
-                        data.wind.toString(),
-                        data.humidity.toString(),
-                        feels_like.toStringAsFixed(1),
-                        data.pressure.toString(),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Add'),
+                        onPressed: () {
+                          if (controller.text.isNotEmpty) {
+                            setState(() {
+                              cityList.add(controller.text);
+                            });
+                          }
+                          Navigator.of(context).pop();
+                        },
                       ),
                     ],
                   );
-              }
-            },
+                },
+              );
+            });
+          },
+        ),
+        title: Center(child: Text(city)),
+        actions: [
+          DropdownButton(
+            iconEnabledColor: Colors.white,
+            dropdownColor: Colors.indigo,
+            value: city,
+            items: cityList.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: (value) => setState(
+              () {
+                city = value!;
+                yourLocation = value == 'Your Location';
+              },
+            ),
           ),
+        ],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Colors.indigo,
+        ),
+        child: FutureBuilder(
+          future: yourLocation ? getDataUsingLat() : getDataUsingCity(),
+          builder: (context, AsyncSnapshot<WeatherModel?> snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+                return const Center(child: CircularProgressIndicator());
+              case ConnectionState.waiting:
+                return const Center(child: CircularProgressIndicator());
+              case ConnectionState.active:
+                return const Center(child: CircularProgressIndicator());
+              case ConnectionState.done:
+                if (!snapshot.hasData) {
+                  return const Center(
+                      child: Text(
+                    "Your entered city Name is incorrect or GPS Permission is denied",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ));
+                }
+                final data = snapshot.data;
+                final temp = data!.temp! - 273.15; // to Celcius
+                final feels_like = data.feels_like! - 273.15; // to Celcius
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    weatherWidget(
+                      data.icon!,
+                      data.weatherDesc!,
+                      temp.toStringAsFixed(1),
+                      data.cityName!,
+                    ),
+                    const SizedBox(
+                      height: 60,
+                    ),
+                    const Text(
+                      "Additional Information",
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Divider(),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    additionalInfo(
+                      data.wind.toString(),
+                      data.humidity.toString(),
+                      feels_like.toStringAsFixed(1),
+                      data.pressure.toString(),
+                    ),
+                  ],
+                );
+            }
+          },
         ),
       ),
     );
